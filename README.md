@@ -1,4 +1,4 @@
-# 🧠 Pydantic-main — FastAPI + MongoDB + WebSockets + Pydantic V2
+# FastAPI CRUD API — MongoDB, WebSockets and Pydantic V2
 
 A complete Python 3.13+ project demonstrating modern API development using:
 - **FastAPI** (REST + WebSockets)
@@ -50,8 +50,8 @@ docker ps
 
 ## ⚙️ 2️⃣ Clone and Enter Project
 ```bash
-git clone https://github.com/ShardulAswale/Pydantic.git
-cd Pydantic
+git clone https://github.com/ShardulAswale/pydantic-fastapi-crud-app.git
+cd pydantic-fastapi-crud-app
 ```
 
 ---

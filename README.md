@@ -1,205 +1,32 @@
-# FastAPI CRUD API — MongoDB, WebSockets and Pydantic V2
+# FastAPI Car CRUD API
 
-A complete Python 3.13+ project demonstrating modern API development using:
-- **FastAPI** (REST + WebSockets)
-- **MongoDB** (via Motor)
-- **Pydantic V2** models generated from JSON Schema
-- **HTTP Basic Auth**
-- **Modern Python packaging** with `pyproject.toml`
+Python API for storing car records in MongoDB, with Pydantic validation and HTTP Basic authentication.
 
----
+## How it works
 
-## 🚀 Features
-✅ REST CRUD for Cars (MongoDB)  
-✅ WebSocket chat with token auth  
-✅ In-memory CRUD for demo Items  
-✅ Schema-driven models via `datamodel-code-generator`  
-✅ Live Swagger UI at `/swagger`  
+The `car_api` package separates routes, service operations, authentication and database setup. Motor performs asynchronous MongoDB operations, and a counter assigns IDs when omitted. Car fields include make, model, year, colour and price.
 
----
+## Usage
 
-## 🧩 Tech Stack
-| Layer | Technology |
-|--------|-------------|
-| Language | Python 3.13+ |
-| Framework | FastAPI + Uvicorn |
-| Database | MongoDB 7 (Docker) |
-| Async ORM / Driver | Motor |
-| Validation | Pydantic V2 |
-| Auth | HTTP Basic Auth / Base64 token for WS |
-| Packaging | pyproject.toml (PEP 621) |
-| Tests | pytest + httpx + websockets |
+Requires Python 3.13 or later and an accessible MongoDB instance. From the repository root, inside your Python environment:
 
----
-
-## ⚙️ 1️⃣ Setup MongoDB Container
-Pull and run Mongo locally:
-
-```bash
-docker pull mongo:7
-docker run -d   --name mongo   -p 27017:27017   mongo:7
+```sh
+python -m pip install -e ".[dev]"
+python -m uvicorn car_api.main:app --reload
 ```
 
-Verify it’s running:
-```bash
-docker ps
-# Look for "mongo" Up and listening on 0.0.0.0:27017
-```
+Configure `MONGODB_URI` and `MONGODB_DB` through environment variables or a local `.env` file. Defaults are `mongodb://localhost:27017` and `car_api`.
 
----
+## Endpoints
 
-## ⚙️ 2️⃣ Clone and Enter Project
-```bash
-git clone https://github.com/ShardulAswale/pydantic-fastapi-crud-app.git
-cd pydantic-fastapi-crud-app
-```
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/healthz` | Health response. |
+| POST, GET | `/cars` | Create or list cars. |
+| GET, PUT, DELETE | `/cars/{car_id}` | Retrieve, replace or delete a car. |
 
----
+Open `http://127.0.0.1:8000/swagger` for interactive documentation. Car routes use demo credentials `admin` / `changeme`. Listing accepts `limit` and `offset`.
 
-## ⚙️ 3️⃣ Create Virtual Environment
-```bash
-python3.13 -m venv .venv
-source .venv/bin/activate       # Windows: .venv\Scripts\activate
-python -m pip install --upgrade pip
-```
+## Notes
 
----
-
-## ⚙️ 4️⃣ Install Dependencies
-Editable install with dev extras:
-```bash
-pip install -e .[dev]
-```
-
----
-
-## ⚙️ 5️⃣ Environment Variables
-Create a `.env` file in the project root:
-
-```
-MONGODB_URI=mongodb://localhost:27017
-MONGODB_DB=realtime_api
-```
-
-*(These defaults match your local Docker Mongo container.)*
-
----
-
-## ⚙️ 6️⃣ (Optionally) Generate Pydantic Models
-Use CLI
-```
-python -m datamodel_code_generator \
-  --input src/car_api/models/schemas/car_schema.json \
-  --input-file-type jsonschema \
-  --output src/car_api/models/car_model.py \
-  --target-python-version 3.13 \
-  --disable-timestamps \
-  --output-model-type pydantic_v2.BaseModel
-```
-
-## ⚙️ 7️⃣ Run the API Server
-```bash
-uvicorn realtime_api.main:app --reload
-```
-
-You should see:
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000
-INFO:     Application startup complete.
-```
-
----
-
-## 🔍 8️⃣ Explore Swagger Docs
-Open: **http://127.0.0.1:8000/swagger**
-
-Authenticate (top-right “Authorize” button):  
-```
-username: admin
-password: changeme
-```
-
----
-
-## 🧪 9️⃣ Example Requests
-
-### Create a Car
-```bash
-curl -u admin:changeme -X POST http://127.0.0.1:8000/cars   -H "Content-Type: application/json"   -d '{"make":"Tesla","model":"Model 3","year":2023,"color":"White","price":39999.0}'
-```
-
-### List Cars
-```bash
-curl -u admin:changeme http://127.0.0.1:8000/cars
-```
-
-### WebSocket Chat
-Get a token:
-```bash
-curl http://127.0.0.1:8000/token
-```
-
-Connect in browser console:
-```js
-let ws = new WebSocket("ws://127.0.0.1:8000/ws?room=general&token=YWRtaW46Y2hhbmdlbWU=");
-ws.onmessage = (e) => console.log(e.data);
-ws.onopen = () => ws.send(JSON.stringify({ text: "hello world" }));
-```
-
----
-
-## 🧩 10️⃣ Run Tests
-```bash
-pytest -v
-```
-
----
-
-## 📦 11️⃣ Freeze Dependencies
-After everything works:
-```bash
-pip freeze > requirements.txt
-git add requirements.txt
-git commit -m "Freeze dependencies"
-```
-
----
-
-## 🧱 Folder Structure
-```
-src/realtime_api/
-├── main.py                 # FastAPI entrypoint
-├── auth/                   # Auth (Basic + WS token)
-├── db/mongo.py             # Async Mongo init + counters
-├── models/                 # Pydantic models + schemas
-├── routes/                 # REST + WebSocket endpoints
-├── services/               # CRUD + WS manager logic
-└── ...
-scripts/
-└── generate_models.py
-tests/
-└── pytest tests
-```
-
----
-
-## 🧾 Default Credentials
-| Type | Username | Password |
-|------|-----------|-----------|
-| HTTP Basic | `admin` | `changeme` |
-| WS Token | `base64("admin:changeme")` |
-
----
-
-## ⚙️ Troubleshooting
-| Symptom | Fix |
-|----------|-----|
-| `ServerSelectionTimeoutError` | Mongo container not running → `docker ps` |
-| `Mongo not initialized` | App started before Mongo was reachable → wait 5s or retry |
-| 401 Unauthorized | Wrong credentials in Basic Auth or WS token |
-| Port in use | Change with `uvicorn --port 8001` or `-p 27018:27017` for Mongo |
-
----
-
-## 🧾 License
-MIT License © 2025 Your Name
+This checkout has no WebSocket, token or item routes. Use the editable package install above; the frozen requirements contain a reference to another repository. Tests require MongoDB and can modify its car collection.
